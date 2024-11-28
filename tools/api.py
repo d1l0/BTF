@@ -17,7 +17,7 @@ def create_container():
     data = request.get_json()
 
     if not data or 'Hostname' not in data:
-        return jsonify({'error': 'Bad request. "name" is required.'}), 400
+        return jsonify({'error': 'Bad request. "Hostname" is required.'}), 400
 
     container_id = get_next_id()
     db[container_id] = {
@@ -57,8 +57,9 @@ def update_container(container_id):
         return jsonify({'error': 'container not found'}), 404
 
     # Update fields if provided
-    container['name'] = data.get('name', container['name'])
-    container['description'] = data.get('description', container['description'])
+    container['Hostname'] = data.get('Hostname', container['Hostname'])
+    container['Entrypoint'] = data.get('Entrypoint', container['Entrypoint'])
+    container['Image'] = data.get('Image', container['Image'])
 
     return jsonify(container), 200
 
