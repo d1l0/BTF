@@ -13,48 +13,51 @@ def client():
 @pytest.fixture
 def sample_data():
     return {
-        'name': 'Test Item',
-        'description': 'A simple test item'
+        'Hostname': 'com.btf.containers',
+        'Entrypoint': '',
+        'Image': "ubuntu"
     }
 
-# Test the GET /items route when no items exist
-def test_get_empty_items(client):
-    response = client.get('/items')
+# Test the GET /containers route when no containers exist
+def test_get_empty_containers(client):
+    response = client.get('/containers')
     assert response.status_code == 400
-    assert response.json == {'error': 'Items are empty'}
+    assert response.json == {'error': 'containers are empty'}
 
-# Test the GET /items route when some items exist
-def test_get_items(client, sample_data):
-    # First, create an item
-    response = client.post('/items', json=sample_data)
+# Test the GET /containers route when some containers exist
+def test_get_containers(client, sample_data):
+    # First, create an container
+    response = client.post('/containers', json=sample_data)
     assert response.status_code == 201
-    created_item = response.json
+    created_container = response.json
 
-    # Now, test GET /items
-    response = client.get('/items')
+    # Now, test GET /containers
+    response = client.get('/containers')
     assert response.status_code == 200
-    items = response.json
-    assert len(items) == 1
-    assert items[0]['name'] == created_item['name']
-    assert items[0]['description'] == created_item['description']
+    containers = response.json
+    assert len(containers) == 1
+    assert containers[0]['Hostname'] == created_container['Hostname']
+    assert containers[0]['Entrypoint'] == created_container['Entrypoint']
+    assert containers[0]['Image'] == created_container['Image']
 
-# Test the GET /items/<id> route with an existing item
-def test_get_item_by_id(client, sample_data):
-    # Create an item
-    response = client.post('/items', json=sample_data)
+# Test the GET /containers/<id> route with an existing container
+def test_get_container_by_id(client, sample_data):
+    # Create an container
+    response = client.post('/containers', json=sample_data)
     assert response.status_code == 201
-    created_item = response.json
+    created_container = response.json
 
-    # Fetch the created item by ID
-    response = client.get(f'/items/{created_item["id"]}')
+    # Fetch the created container by ID
+    response = client.get(f'/containers/{created_container["id"]}')
     assert response.status_code == 200
-    assert response.json['id'] == created_item['id']
-    assert response.json['name'] == created_item['name']
-    assert response.json['description'] == created_item['description']
+    assert response.json['id'] == created_container['id']
+    assert response.json['Hostname'] == created_container['Hostname']
+    assert response.json['Entrypoint'] == created_container['Entrypoint']
+    assert response.json['Image'] == created_container['Image']
 
-# Test the GET /items/<id> route with a non-existent item
-def test_get_item_not_found(client):
-    # Try to fetch an item that doesn't exist
-    response = client.get('/items/9999')
+# Test the GET /containers/<id> route with a non-existent container
+def test_get_container_not_found(client):
+    # Try to fetch an container that doesn't exist
+    response = client.get('/containers/1010101010101010')
     assert response.status_code == 404
-    assert response.json == {'error': 'Item not found'}
+    assert response.json == {'error': 'container not found'}

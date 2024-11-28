@@ -11,64 +11,65 @@ def get_next_id():
     return max(db.keys(), default=0) + 1
 
 
-# CREATE: Add a new item
-@app.route('/items', methods=['POST'])
-def create_item():
+# CREATE: Add a new container
+@app.route('/containers', methods=['POST'])
+def create_container():
     data = request.get_json()
 
-    if not data or 'name' not in data:
+    if not data or 'Hostname' not in data:
         return jsonify({'error': 'Bad request. "name" is required.'}), 400
 
-    item_id = get_next_id()
-    db[item_id] = {
-        'id': item_id,
-        'name': data['name'],
-        'description': data.get('description', '')
+    container_id = get_next_id()
+    db[container_id] = {
+        'id': container_id,
+        'Hostname': data['Hostname'],
+        'Entrypoint': data.get('Entrypoint', ''),
+        'Image': data.get('Image', 'ubuntu')
     }
 
-    return jsonify(db[item_id]), 201
+    return jsonify(db[container_id]), 201
 
 
-# READ: Get all items
-@app.route('/items', methods=['GET'])
-def get_items():
+# READ: Get all containers
+@app.route('/containers', methods=['GET'])
+def get_containers():
     if len(db) == 0:
-        return jsonify({'error': 'Items are empty'}), 400
+        return jsonify({'error': 'containers are empty'}), 400
     return jsonify(list(db.values())), 200
 
 
-# READ: Get a single item by ID
-@app.route('/items/<int:item_id>', methods=['GET'])
-def get_item(item_id):
-    item = db.get(item_id)
-    if not item:
-        return jsonify({'error': 'Item not found'}), 404
-    return jsonify(item), 200
+# READ: Get a single container by ID
+@app.route('/containers/<int:container_id>', methods=['GET'])
+def get_container(container_id):
+    container = db.get(container_id)
+    if not container:
+        return jsonify({'error': 'container not found'}), 404
+    return jsonify(container), 200
 
 
-# UPDATE: Update an existing item by ID
-@app.route('/items/<int:item_id>', methods=['PUT'])
-def update_item(item_id):
+# UPDATE: Update an existing container by ID
+@app.route('/containers/<int:container_id>', methods=['PUT'])
+def update_container(container_id):
     data = request.get_json()
 
-    item = db.get(item_id)
-    if not item:
-        return jsonify({'error': 'Item not found'}), 404
+    container = db.get(container_id)
+    if not container:
+        return jsonify({'error': 'container not found'}), 404
 
     # Update fields if provided
-    item['name'] = data.get('name', item['name'])
-    item['description'] = data.get('description', item['description'])
+    container['name'] = data.get('name', container['name'])
+    container['description'] = data.get('description', container['description'])
 
-    return jsonify(item), 200
+    return jsonify(container), 200
 
 
-# DELETE: Delete an item by ID
-@app.route('/items/<int:item_id>', methods=['DELETE'])
-def delete_item(item_id):
-    item = db.pop(item_id, None)
-    if not item:
-        return jsonify({'error': 'Item not found'}), 404
-    return jsonify({'message': f'Item {item_id} deleted'}), 200
+# DELETE: Delete an container by ID
+@app.route('/containers/<int:container_id>', methods=['DELETE'])
+def delete_container(container_id):
+    container = db.pop(container_id, None)
+    if not container:
+        return jsonify({'error': 'container not found'}), 404
+    return jsonify({'message': f'container {container_id} deleted'}), 200
 
 
 if __name__ == '__main__':
