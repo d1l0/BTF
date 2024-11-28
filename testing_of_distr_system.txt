@@ -1,4 +1,5 @@
-# Super high-level QA vision of processes to achieve quality monitoring of a distributed container-based hosting platform that is highly sensitive from the perspective of uptime, stability, and reliability.
+# Super high-level QA vision of processes to achieve quality monitoring of a distributed container-based hosting platform 
+  that is highly sensitive from the perspective of uptime, stability, and reliability.
 
 +-------------------------------------------------------------------------------------------------------+            
 |                                                                                                       |            
