@@ -1,20 +1,20 @@
 import pytest
 from tools.api import app, db  # Import the Flask app and in-memory database
 
-# Test client fixture
 @pytest.fixture
 def client():
+    """Test client fixture"""
     with app.test_client() as client:
         yield client  # Provide the test client for tests
 
-# Automatically reset the database before each test
 @pytest.fixture(autouse=True)
 def reset_db():
+    """Automatically reset the database before each test"""
     db.clear()
 
-# Sample data fixture for testing
 @pytest.fixture
 def sample_data():
+    """Sample data fixture for testing"""
     return {
         'Hostname': 'com.btf.containers',
         'Entrypoint': '',
