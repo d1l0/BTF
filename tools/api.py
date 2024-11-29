@@ -12,7 +12,7 @@ def get_next_id():
 
 
 # CREATE: Add a new container
-@app.route('/containers', methods=['POST'])
+@app.route('/orchestrator/containers', methods=['POST'])
 def create_container():
     data = request.get_json()
 
@@ -31,7 +31,7 @@ def create_container():
 
 
 # READ: Get all containers
-@app.route('/containers', methods=['GET'])
+@app.route('/orchestrator/containers', methods=['GET'])
 def get_containers():
     if len(db) == 0:
         return jsonify({'error': 'containers are empty'}), 400
@@ -39,7 +39,7 @@ def get_containers():
 
 
 # READ: Get a single container by ID
-@app.route('/containers/<int:container_id>', methods=['GET'])
+@app.route('/orchestrator/containers/<int:container_id>', methods=['GET'])
 def get_container(container_id):
     container = db.get(container_id)
     if not container:
@@ -48,7 +48,7 @@ def get_container(container_id):
 
 
 # UPDATE: Update an existing container by ID
-@app.route('/containers/<int:container_id>', methods=['PUT'])
+@app.route('/orchestrator/containers/<int:container_id>', methods=['PUT'])
 def update_container(container_id):
     data = request.get_json()
 
@@ -65,7 +65,7 @@ def update_container(container_id):
 
 
 # DELETE: Delete an container by ID
-@app.route('/containers/<int:container_id>', methods=['DELETE'])
+@app.route('/orchestrator/containers/<int:container_id>', methods=['DELETE'])
 def delete_container(container_id):
     container = db.pop(container_id, None)
     if not container:

@@ -1,5 +1,5 @@
 import pytest
-from tools.api import app
+from tools.api import app, db
 
 
 # Test client fixture
@@ -8,6 +8,10 @@ def client():
     # Set up a test client
     with app.test_client() as client:
         yield client  # This is where the test client is passed to the test
+
+@pytest.fixture(autouse=True)  # Automatically used in every test
+def reset_db():
+    db.clear()
 
 # Sample data for testing
 @pytest.fixture
@@ -18,10 +22,25 @@ def sample_data():
         'Image': "ubuntu"
     }
 
+# Test creating a container and ensuring that data is stored properly (simulating DB state)
+def test_create_container_and_verify_in_db(client, sample_data):
+    # First, create an container
+    response = client.post('/orchestrator/containers', json=sample_data)
+    assert response.status_code == 201
+    created_container = response.json
+
+    # Now, test GET /orchestrator/containers
+    response = client.get('/orchestrator/containers')
+    assert response.status_code == 200
+    containers = response.json
+    assert len(containers) == 1
+    assert containers[0]['Hostname'] == created_container['Hostname']
+    assert containers[0]['Entrypoint'] == created_container['Entrypoint']
+    assert containers[0]['Image'] == created_container['Image']
 
 # Test creating a container with valid data
 def test_create_container_valid_data(client, sample_data):
-    response = client.post('/containers', json=sample_data)
+    response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
@@ -36,7 +55,7 @@ def test_create_container_missing_hostname(client, sample_data):
     data_missing_hostname = sample_data.copy()
     del data_missing_hostname['Hostname']
 
-    response = client.post('/containers', json=data_missing_hostname)
+    response = client.post('/orchestrator/containers', json=data_missing_hostname)
     assert response.status_code == 400
     assert response.json == {'error': 'Bad request. "Hostname" is required.'}
 
@@ -45,7 +64,7 @@ def test_create_container_missing_entrypoint(client, sample_data):
     data_missing_entrypoint = sample_data.copy()
     del data_missing_entrypoint['Entrypoint']
 
-    response = client.post('/containers', json=data_missing_entrypoint)
+    response = client.post('/orchestrator/containers', json=data_missing_entrypoint)
     assert response.status_code == 201
     created_container = response.json
 
@@ -57,7 +76,7 @@ def test_create_container_invalid_image(client, sample_data):
     invalid_data = sample_data.copy()
     invalid_data['Image'] = 'invalid-image-name'
 
-    response = client.post('/containers', json=invalid_data)
+    response = client.post('/orchestrator/containers', json=invalid_data)
     assert response.status_code == 201
     created_container = response.json
 
@@ -66,7 +85,7 @@ def test_create_container_invalid_image(client, sample_data):
 
 # Test creating a container with an empty request body
 def test_create_container_empty_body(client):
-    response = client.post('/containers', json={})
+    response = client.post('/orchestrator/containers', json={})
     assert response.status_code == 400
     assert response.json == {'error': 'Bad request. "Hostname" is required.'}
 
@@ -74,7 +93,7 @@ def test_create_container_empty_body(client):
 def test_create_container_incomplete_data(client):
     incomplete_data = {'Hostname': 'test-hostname'}
 
-    response = client.post('/containers', json=incomplete_data)
+    response = client.post('/orchestrator/containers', json=incomplete_data)
     assert response.status_code == 201
     created_container = response.json
 
@@ -86,11 +105,11 @@ def test_create_container_incomplete_data(client):
 # Test creating multiple containers with unique IDs
 def test_create_multiple_containers(client, sample_data):
     # Create two containers
-    response_1 = client.post('/containers', json=sample_data)
+    response_1 = client.post('/orchestrator/containers', json=sample_data)
     assert response_1.status_code == 201
     created_container_1 = response_1.json
 
-    response_2 = client.post('/containers', json=sample_data)
+    response_2 = client.post('/orchestrator/containers', json=sample_data)
     assert response_2.status_code == 201
     created_container_2 = response_2.json
 
@@ -100,12 +119,12 @@ def test_create_multiple_containers(client, sample_data):
 # Test creating a container and ensuring the ID is incremented correctly
 def test_create_container_id_increment(client, sample_data):
     # Create the first container
-    response_1 = client.post('/containers', json=sample_data)
+    response_1 = client.post('/orchestrator/containers', json=sample_data)
     assert response_1.status_code == 201
     created_container_1 = response_1.json
 
     # Create the second container
-    response_2 = client.post('/containers', json=sample_data)
+    response_2 = client.post('/orchestrator/containers', json=sample_data)
     assert response_2.status_code == 201
     created_container_2 = response_2.json
 
@@ -117,7 +136,7 @@ def test_create_container_long_hostname(client):
     long_hostname = 'a' * 256  # 256 characters
     data = {'Hostname': long_hostname, 'Entrypoint': '', 'Image': 'ubuntu'}
 
-    response = client.post('/containers', json=data)
+    response = client.post('/orchestrator/containers', json=data)
     assert response.status_code == 201
     created_container = response.json
 
@@ -128,34 +147,20 @@ def test_create_container_long_hostname(client):
 def test_create_container_special_characters_in_hostname(client):
     data = {'Hostname': 'test@#%hostname!', 'Entrypoint': '', 'Image': 'ubuntu'}
 
-    response = client.post('/containers', json=data)
+    response = client.post('/orchestrator/containers', json=data)
     assert response.status_code == 201
     created_container = response.json
 
     # Verify the container is created with the special characters in the hostname
     assert created_container['Hostname'] == 'test@#%hostname!'
 
-# Test creating a container and ensuring that data is stored properly (simulating DB state)
-def test_create_container_and_verify_in_db(client, sample_data):
-    # Create a container
-    response = client.post('/containers', json=sample_data)
-    assert response.status_code == 201
-    created_container = response.json
-
-    # Verify that the container data can be retrieved via the GET /containers route
-    response = client.get('/containers')
-    assert response.status_code == 200
-    containers = response.json
-    assert len(containers) == 1
-    assert containers[0]['id'] == created_container['id']
-    assert containers[0]['Hostname'] == created_container['Hostname']
 
 # Test creating a container with missing "Image" (optional field)
 def test_create_container_missing_image(client, sample_data):
     data_missing_image = sample_data.copy()
     del data_missing_image['Image']
 
-    response = client.post('/containers', json=data_missing_image)
+    response = client.post('/orchestrator/containers', json=data_missing_image)
     assert response.status_code == 201
     created_container = response.json
 
