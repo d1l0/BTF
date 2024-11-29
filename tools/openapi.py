@@ -68,6 +68,9 @@ class ContainerList(Resource):
 @container_ns.route("/<int:container_id>")
 @container_ns.param("container_id", "The unique ID of the container")
 class Container(Resource):
+    """
+    Containers
+    """
     @container_ns.doc("get_container")
     @container_ns.response(200, "Success", container_response)
     @container_ns.response(404, "Container not found")
