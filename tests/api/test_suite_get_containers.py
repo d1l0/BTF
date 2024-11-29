@@ -117,4 +117,3 @@ def test_get_all_containers_varied_data(client):
     assert len(containers) == 2
     assert created_1 in containers
     assert created_2 in containers
-

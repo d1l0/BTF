@@ -71,7 +71,7 @@ def test_delete_same_container_twice(client, sample_data):
 # Test deleting all containers one by one
 def test_delete_all_containers(client, sample_data):
     # Create multiple containers
-    for i in range(3):
+    for _ in range(3):
         response = client.post('/orchestrator/containers', json=sample_data)
         assert response.status_code == 201
 
