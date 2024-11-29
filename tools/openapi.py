@@ -1,3 +1,4 @@
+""""OpenAPI server for test documentation"""
 import argparse
 from flask import Flask, request
 from flask_restx import Api, Resource, fields
@@ -13,8 +14,10 @@ api = Api(
 # In-memory DB
 db = {}
 
-# Helper function to generate next ID
 def get_next_id():
+    """
+    Helper function to generate next ID
+    """
     return max(db.keys(), default=0) + 1
 
 # Define Namespace
@@ -31,9 +34,11 @@ container_response = api.clone("ContainerResponse", container_model, {
     "id": fields.Integer(description="Unique ID of the container"),
 })
 
-# Endpoints
 @container_ns.route("/")
 class ContainerList(Resource):
+    """
+    Endpoints
+    """
     @container_ns.doc("list_containers")
     @container_ns.response(200, "Success", [container_response])
     @container_ns.response(400, "No containers found")
