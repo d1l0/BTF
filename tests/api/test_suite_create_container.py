@@ -188,4 +188,3 @@ def test_create_container_missing_image(client, sample_data):
 
     # Verify the missing "Image" field is set to default "ubuntu"
     assert created_container['Image'] == 'ubuntu'
-
