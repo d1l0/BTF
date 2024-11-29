@@ -90,8 +90,10 @@ def test_update_no_data(client, sample_data):
     # Verify the container remains unchanged
     assert updated_container == created_container
 
-# Test updating a container with partial data
 def test_update_partial_data(client, sample_data):
+    """
+    Test updating a container with partial data
+    """
     # Create a container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
@@ -108,8 +110,10 @@ def test_update_partial_data(client, sample_data):
     assert updated_container['Entrypoint'] == created_container['Entrypoint']
     assert updated_container['Image'] == created_container['Image']
 
-# Test updating a container with invalid fields
 def test_update_invalid_fields(client, sample_data):
+    """
+    Test updating a container with invalid fields
+    """
     # Create a container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
@@ -124,14 +128,18 @@ def test_update_invalid_fields(client, sample_data):
     # Verify no changes were made
     assert updated_container == created_container
 
-# Test updating a container with invalid ID format
 def test_update_invalid_id_format(client):
+    """
+    Test updating a container with invalid ID format
+    """
     updated_data = {'Hostname': 'hostname'}
     response = client.put('/orchestrator/containers/invalid_id', json=updated_data)
     assert response.status_code == 404  # Flask default behavior for invalid route
 
-# Test updating a container with no JSON body
 def test_update_no_json_body(client, sample_data):
+    """
+    Test updating a container with no JSON body
+    """
     # Create a container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
@@ -141,8 +149,10 @@ def test_update_no_json_body(client, sample_data):
     response = client.put(f'/orchestrator/containers/{created_container["id"]}')
     assert response.status_code == 415
 
-# Test updating all fields of a container
 def test_update_all_fields(client, sample_data):
+    """
+    Test updating all fields of a container
+    """
     # Create a container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
@@ -163,8 +173,10 @@ def test_update_all_fields(client, sample_data):
     assert updated_container['Entrypoint'] == updated_data['Entrypoint']
     assert updated_container['Image'] == updated_data['Image']
 
-# Test updating multiple containers independently
 def test_update_multiple_containers(client, sample_data):
+    """
+    Test updating multiple containers independently
+    """
     # Create two containers
     container_1 = client.post('/orchestrator/containers', json=sample_data).json
     container_2 = client.post('/orchestrator/containers', json=sample_data).json

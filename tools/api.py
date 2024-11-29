@@ -6,14 +6,18 @@ app = Flask(__name__)
 db = {}
 
 
-# Helper function to generate next ID for simplicity
 def get_next_id():
+    """
+    Helper function to generate next ID for simplicity
+    """
     return max(db.keys(), default=0) + 1
 
 
-# CREATE: Add a new container
 @app.route('/orchestrator/containers', methods=['POST'])
 def create_container():
+    """
+    CREATE: Add a new container
+    """
     data = request.get_json()
 
     if not data or 'Hostname' not in data:
@@ -30,26 +34,31 @@ def create_container():
     return jsonify(db[container_id]), 201
 
 
-# READ: Get all containers
 @app.route('/orchestrator/containers', methods=['GET'])
 def get_containers():
+    """
+    READ: Get all containers
+    """
     if len(db) == 0:
         return jsonify({'error': 'containers are empty'}), 400
     return jsonify(list(db.values())), 200
 
-
-# READ: Get a single container by ID
 @app.route('/orchestrator/containers/<int:container_id>', methods=['GET'])
 def get_container(container_id):
+    """
+    READ: Get a single container by ID
+    """
     container = db.get(container_id)
     if not container:
         return jsonify({'error': 'container not found'}), 404
     return jsonify(container), 200
 
 
-# UPDATE: Update an existing container by ID
 @app.route('/orchestrator/containers/<int:container_id>', methods=['PUT'])
 def update_container(container_id):
+    """
+    UPDATE: Update an existing container by ID
+    """
     data = request.get_json()
 
     container = db.get(container_id)
@@ -64,24 +73,31 @@ def update_container(container_id):
     return jsonify(container), 200
 
 
-# DELETE: Delete an container by ID
 @app.route('/orchestrator/containers/<int:container_id>', methods=['DELETE'])
 def delete_container(container_id):
+    """
+    DELETE: Delete an container by ID
+    """
     container = db.pop(container_id, None)
     if not container:
         return jsonify({'error': 'container not found'}), 404
     return jsonify({'message': f'container {container_id} deleted'}), 200
 
-# Handle disallowed methods
+
 @app.errorhandler(405)
-def method_not_allowed(e):
+def method_not_allowed(_):
+    """
+    Handle disallowed methods
+    """
     return jsonify({'error': f'Method {request.method} not allowed on {request.path}'}), 405
 
 
-# Optional: Define allowed methods explicitly for clarity
 @app.route('/orchestrator/containers', methods=['OPTIONS'])
 @app.route('/orchestrator/containers/<int:container_id>', methods=['OPTIONS'])
 def options_handler():
+    """
+    Optional: Define allowed methods explicitly for clarity
+    """
     return jsonify({
         'allowed_methods': ['GET', 'POST', 'PUT', 'DELETE']
     }), 200
