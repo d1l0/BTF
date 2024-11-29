@@ -1,3 +1,49 @@
+"""
+Test Suite for the 'POST /orchestrator/containers' API endpoint.
+This suite tests various scenarios for creating containers, ensuring that the
+API handles different types of valid and invalid input, and properly stores
+the data in the simulated in-memory database.
+
+Test Cases:
+-------------
+1. **test_create_container_and_verify_in_db**:
+    - Verifies that when a new container is created, it is properly stored in the database and can be retrieved via GET /orchestrator/containers.
+
+2. **test_create_container_valid_data**:
+    - Ensures that creating a container with valid data results in a successfully created container with the correct attributes (id, Hostname, Entrypoint, and Image).
+
+3. **test_create_container_missing_hostname**:
+    - Tests the case where the 'Hostname' is missing in the request body. The API should return a 400 error with an appropriate error message.
+
+4. **test_create_container_missing_entrypoint**:
+    - Verifies that when the 'Entrypoint' field is missing, the container is created successfully with the default empty string as its Entrypoint.
+
+5. **test_create_container_invalid_image**:
+    - Tests creating a container with an invalid 'Image' value. In this case, the API should accept the invalid value without any validation and store it.
+
+6. **test_create_container_empty_body**:
+    - Ensures that when an empty request body is sent, the API returns a 400 error indicating that the 'Hostname' field is required.
+
+7. **test_create_container_incomplete_data**:
+    - Verifies that when the request body only contains the 'Hostname', the container is created with default values for the missing 'Entrypoint' and 'Image'.
+
+8. **test_create_multiple_containers**:
+    - Verifies that when multiple containers are created, each container has a unique 'id'.
+
+9. **test_create_container_id_increment**:
+    - Tests that the 'id' for each newly created container is incremented correctly, ensuring that the 'id' is unique and follows a consistent pattern.
+
+10. **test_create_container_long_hostname**:
+    - Verifies that the API can handle a container creation with a very long 'Hostname' (256 characters), and the container is created successfully with the long hostname.
+
+11. **test_create_container_special_characters_in_hostname**:
+    - Ensures that the API correctly handles special characters in the 'Hostname' field (e.g., '@', '#', '%') and stores the container with the exact 'Hostname' value provided.
+
+12. **test_create_container_missing_image**:
+    - Verifies that when the 'Image' field is missing, the API sets it to the default value of 'ubuntu'.
+"""
+
+
 # Test creating a container and ensuring that data is stored properly (simulating DB state)
 def test_create_container_and_verify_in_db(client, sample_data):
     # First, create an container

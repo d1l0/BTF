@@ -1,3 +1,36 @@
+"""
+Test Suite for the 'GET /orchestrator/containers/<id>' API endpoint.
+This suite tests various scenarios for retrieving containers by their unique
+IDs, ensuring that the API handles both valid and invalid input correctly and
+responds with appropriate error messages.
+
+Test Cases:
+-------------
+1. **test_get_container_by_id_success**:
+    - Verifies that a container can be created and then successfully retrieved by its ID.
+    - Ensures that the container data fetched by the ID matches the data that was originally posted.
+
+2. **test_get_container_by_nonexistent_id**:
+    - Tests the case where an attempt is made to fetch a container that does not exist (i.e., with a non-existent ID).
+    - The API should return a 404 error with an appropriate error message indicating that the container was not found.
+
+3. **test_get_container_no_containers**:
+    - Tests the scenario where no containers exist in the database.
+    - An attempt to retrieve a container by ID should return a 404 error indicating that no container exists with that ID.
+
+4. **test_get_container_invalid_id_format**:
+    - Tests the case where an invalid ID format (e.g., a string instead of an integer) is provided for fetching the container.
+    - The API should return a 404 error as Flask does not handle invalid ID formats correctly, returning a route-not-found error instead.
+
+5. **test_get_container_negative_id**:
+    - Tests the case where an invalid negative ID is used to fetch a container.
+    - The API should return a 404 error because the ID is not valid.
+
+6. **test_get_container_among_multiple**:
+    - Verifies that when multiple containers are created, each can be fetched correctly by its unique ID.
+    - Ensures that each container's data can be retrieved independently without conflict, even when there are multiple containers in the system.
+"""
+
 # Test getting a container by ID after creating it
 def test_get_container_by_id_success(client, sample_data):
     # Create a container

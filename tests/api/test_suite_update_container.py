@@ -1,3 +1,49 @@
+"""
+Test Suite for Updating Containers in the API.
+This suite tests the various scenarios in which a container's data can be updated via the `PUT` method.
+It ensures that the API responds correctly to valid updates, partial updates, invalid fields, and other edge cases.
+
+Test Cases:
+-------------
+1. **test_update_existing_container**:
+    - Verifies that a container can be successfully updated with valid data.
+    - The test creates a container, updates its `Hostname` and `Entrypoint`, and ensures the container is correctly updated.
+    - The response is checked to ensure the updated fields match the new data, while unchanged fields remain the same.
+
+2. **test_update_non_existent_container**:
+    - Verifies that attempting to update a non-existent container (e.g., with an ID of `9999`) returns a `404 Not Found` response.
+    - The response should contain an error message indicating that the container was not found.
+
+3. **test_update_no_data**:
+    - Verifies that a `PUT` request with an empty JSON body does not modify the container.
+    - The test creates a container, sends an empty JSON body to update it, and ensures the container remains unchanged.
+
+4. **test_update_partial_data**:
+    - Verifies that partial updates to a container are correctly applied.
+    - The test updates only the `Hostname` field of a container, leaving other fields (like `Entrypoint` and `Image`) unchanged.
+    - The response is checked to ensure only the `Hostname` is updated, while other fields remain as before.
+
+5. **test_update_invalid_fields**:
+    - Verifies that attempting to update a container with invalid fields (i.e., fields not expected by the API) does not change the container's data.
+    - The test attempts to update a container with invalid fields and ensures the container remains unchanged.
+
+6. **test_update_invalid_id_format**:
+    - Verifies that attempting to update a container with an invalid ID format (e.g., a string instead of a numeric ID) results in a `404 Not Found` response.
+    - This ensures that the API correctly handles invalid ID formats.
+
+7. **test_update_no_json_body**:
+    - Verifies that attempting to update a container without providing a JSON body results in a `415 Unsupported Media Type` response.
+    - This ensures that the API enforces the requirement for a JSON payload when updating a container.
+
+8. **test_update_all_fields**:
+    - Verifies that all fields of a container can be updated simultaneously.
+    - The test creates a container and updates all fields (`Hostname`, `Entrypoint`, and `Image`). The response is checked to ensure all fields are updated accordingly.
+
+9. **test_update_multiple_containers**:
+    - Verifies that multiple containers can be updated independently of each other.
+    - The test creates two containers, updates each with different data, and ensures each container is updated correctly without affecting the other.
+"""
+
 # Test updating an existing container with valid data
 def test_update_existing_container(client, sample_data):
     # Create a container

@@ -72,6 +72,20 @@ def delete_container(container_id):
         return jsonify({'error': 'container not found'}), 404
     return jsonify({'message': f'container {container_id} deleted'}), 200
 
+# Handle disallowed methods
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({'error': f'Method {request.method} not allowed on {request.path}'}), 405
+
+
+# Optional: Define allowed methods explicitly for clarity
+@app.route('/orchestrator/containers', methods=['OPTIONS'])
+@app.route('/orchestrator/containers/<int:container_id>', methods=['OPTIONS'])
+def options_handler():
+    return jsonify({
+        'allowed_methods': ['GET', 'POST', 'PUT', 'DELETE']
+    }), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8888)
