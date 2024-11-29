@@ -44,8 +44,10 @@ Test Cases:
     - The test creates two containers, updates each with different data, and ensures each container is updated correctly without affecting the other.
 """
 
-# Test updating an existing container with valid data
 def test_update_existing_container(client, sample_data):
+    """
+    Test updating an existing container with valid data
+    """
     # Create a container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
@@ -62,15 +64,19 @@ def test_update_existing_container(client, sample_data):
     assert updated_container['Entrypoint'] == updated_data['Entrypoint']
     assert updated_container['Image'] == created_container['Image']  # Ensure unchanged fields remain the same
 
-# Test updating a non-existent container
 def test_update_non_existent_container(client):
+    """
+    Test updating a non-existent container
+    """
     updated_data = {'Hostname': 'new.hostname'}
     response = client.put('/orchestrator/containers/9999', json=updated_data)
     assert response.status_code == 404
     assert response.json == {'error': 'container not found'}
 
-# Test updating a container without providing any data
 def test_update_no_data(client, sample_data):
+    """
+    Test updating a container without providing any data
+    """
     # Create a container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201

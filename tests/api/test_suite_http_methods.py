@@ -15,11 +15,13 @@ Test Cases:
 
 3. **test_method_allowed_list**:
     - Tests that various HTTP methods (`OPTIONS`, `PUT`, `GET`, `DELETE`, `HEAD`) are correctly handled by the API for the `/orchestrator/containers/1` endpoint.
-    - The test uses the `OPTIONS` method to check which methods are allowed on the endpoint. The response should return a status code of 200 and the `Allow` header should include the allowed HTTP methods for the endpoint (e.g., `GET`, `DELETE`, etc.).
+    - The test uses the `OPTIONS` method to check which methods are allowed on the endpoint.
+      The response should return a status code of 200 and the `Allow` header should include the allowed HTTP methods for the endpoint (e.g., `GET`, `DELETE`, etc.).
     - The test is parameterized for each method in the list, ensuring that all these methods are correctly validated for the endpoint.
 """
 
 import pytest
+
 def test_method_not_allowed(client):
     """
     Test that the API correctly responds with a 405 error for not-allowed HTTP methods.
@@ -32,7 +34,9 @@ def test_method_not_allowed(client):
     }
 
 def test_method_not_allowed_id(client):
-    # Attempt to use a PATCH method on a specific container endpoint
+    """
+    Attempt to use a PATCH method on a specific container endpoint
+    """
     response = client.patch('/orchestrator/containers/1')
     assert response.status_code == 405
     assert response.json == {
@@ -41,7 +45,9 @@ def test_method_not_allowed_id(client):
 
 @pytest.mark.parametrize("method", ['OPTIONS', 'PUT', 'GET', 'DELETE', 'HEAD'])
 def test_method_allowed_list(client, method):
-    # Attempt to use OPTIONS on an endpoint with no OPTIONS route
+    """
+    Attempt to use OPTIONS on an endpoint with no OPTIONS route
+    """
     response = client.options('/orchestrator/containers/1')
     assert response.status_code == 200
     assert method in response.headers['Allow']

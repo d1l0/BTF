@@ -32,15 +32,18 @@ Usage:
 - Run this test suite with pytest to ensure the `GET /orchestrator/containers` endpoint behaves as expected.
 """
 
-
-# Test getting all containers when the database is empty
 def test_get_all_containers_empty(client):
+    """
+    Test getting all containers when the database is empty
+    """
     response = client.get('/orchestrator/containers')
     assert response.status_code == 400
     assert response.json == {'error': 'containers are empty'}
 
-# Test getting all containers after adding a single container
 def test_get_all_containers_single_entry(client, sample_data):
+    """
+    Test getting all containers after adding a single container
+    """
     # Add a single container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
@@ -55,8 +58,10 @@ def test_get_all_containers_single_entry(client, sample_data):
     assert len(containers) == 1
     assert containers[0] == created_container
 
-# Test getting all containers after adding multiple containers
 def test_get_all_containers_multiple_entries(client, sample_data):
+    """
+    Test getting all containers after adding multiple containers
+    """
     # Add multiple containers
     response_1 = client.post('/orchestrator/containers', json=sample_data)
     assert response_1.status_code == 201
@@ -76,8 +81,10 @@ def test_get_all_containers_multiple_entries(client, sample_data):
     assert container_1 in containers
     assert container_2 in containers
 
-# Test the structure of the response when fetching all containers
 def test_get_all_containers_structure(client, sample_data):
+    """
+    Test the structure of the response when fetching all containers
+    """
     # Add a container
     response = client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
@@ -94,8 +101,10 @@ def test_get_all_containers_structure(client, sample_data):
         assert 'Entrypoint' in container
         assert 'Image' in container
 
-# Test getting containers when there are multiple with different configurations
 def test_get_all_containers_varied_data(client):
+    """
+    Test getting containers when there are multiple with different configurations
+    """
     # Add multiple containers with different data
     container_1 = {'Hostname': 'container1', 'Entrypoint': '/bin/bash', 'Image': 'alpine'}
     container_2 = {'Hostname': 'container2', 'Entrypoint': '/start.sh', 'Image': 'nginx'}
