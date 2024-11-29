@@ -1,27 +1,3 @@
-import pytest
-from tools.api import app, db
-
-
-# Test client fixture
-@pytest.fixture
-def client():
-    # Set up a test client
-    with app.test_client() as client:
-        yield client  # This is where the test client is passed to the test
-
-@pytest.fixture(autouse=True)  # Automatically used in every test
-def reset_db():
-    db.clear()
-
-# Sample data for testing
-@pytest.fixture
-def sample_data():
-    return {
-        'Hostname': 'com.btf.containers',
-        'Entrypoint': '',
-        'Image': "ubuntu"
-    }
-
 # Test creating a container and ensuring that data is stored properly (simulating DB state)
 def test_create_container_and_verify_in_db(client, sample_data):
     # First, create an container

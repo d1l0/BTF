@@ -1,27 +1,3 @@
-import pytest
-from tools.api import app, db
-
-
-# Test client fixture
-@pytest.fixture
-def client():
-    # Set up a test client
-    with app.test_client() as client:
-        yield client  # This is where the test client is passed to the test
-
-# Sample data for testing
-@pytest.fixture
-def sample_data():
-    return {
-        'Hostname': 'com.btf.containers',
-        'Entrypoint': '',
-        'Image': "ubuntu"
-    }
-
-@pytest.fixture(autouse=True)  # Automatically used in every test
-def reset_db():
-    db.clear()
-
 # Test the GET /orchestrator/containers route when no containers exist
 def test_get_empty_containers(client):
     response = client.get('/orchestrator/containers')
