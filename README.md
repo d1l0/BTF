@@ -39,7 +39,7 @@ This repository is a **Beta Testing Framework (BTF)** designed to test APIs for 
 3. **Install dependencies**:
 
     ```bash
-    pip install -e requirements.txt
+    pip install -r requirements.txt
     ```
 
 ---
