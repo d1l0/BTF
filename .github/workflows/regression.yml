@@ -31,3 +31,11 @@ jobs:
       with:
         name: junit-test-results
         path: reports/junit-report.xml
+    - name: Run Regression Tests and Save JUnit Report
+      run: |
+        . ./venv/bin/activate
+        pytest -vvv --junitxml=reports/junit-report.xml
+    - name: Publish JUnit Test Report
+      uses: mikepenz/action-junit-report@v3
+      with:
+        report_paths: reports/junit-report.xml
