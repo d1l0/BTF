@@ -1,3 +1,4 @@
+# Configuration file for reusable methods
 import pytest
 from tools.api import app, db  # Import the Flask app and in-memory database
 
