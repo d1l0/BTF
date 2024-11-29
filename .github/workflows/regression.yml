@@ -29,13 +29,7 @@ jobs:
       run: |
         . ./venv/bin/activate
         pytest -vvv --junitxml=reports/junit-report.xml
-    - name: Upload Test Results
-      if: always()
-      uses: actions/upload-artifact@v4
+    - name: Publish JUnit Test Report
+      uses: mikepenz/action-junit-report@v3
       with:
-        name: junit-test-results
-        path: reports/junit-report.xml
-    - name: Run Regression Tests and Save JUnit Report
-      run: |
-        . ./venv/bin/activate
-        pytest -vvv --junitxml=reports/junit-report.xml
+        report_paths: reports/junit-report.xml
