@@ -1,6 +1,8 @@
 name: Pylint
 
-on: [push]
+on:
+  push:  # Trigger on push events
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   build:
