@@ -32,3 +32,11 @@ jobs:
       uses: mikepenz/action-junit-report@v3
       with:
         report_paths: reports/junit-report.xml
+    - name: Run tests and collect coverage
+      run: |
+        . venv/bin/activate
+        pytest --cov=your_app_directory --cov-report=xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
