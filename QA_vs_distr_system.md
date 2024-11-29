@@ -37,7 +37,7 @@ Following diagram describes a **global monitoring and alerting system** with mul
 |    |    |    |  +------+    +------+  |    |   +------+  +------+  |         ^   ^              |     |            
 |    |    |    |                        |    |                       |         |   |              |     |            
 |    |    |    |        +--------+      |    |  Health Checker:      |         |   |              |     |            
-|    |    |    |        |Docker  |      |    |  CPU, Memm, Network,  |         |   |              |     |            
+|    |    |    |        |Docker  |      |    |  CPU, Mem, Network,   |         |   |              |     |            
 |    |    |    |        |        |      |    |  Disk Space, etc.     |         |   |              |     |            
 |    |    |    |        +--------+      |    |                       |         |   |              |     |            
 |    |    |    +------------------------+    +-----------------------+         |   |              |     |            
