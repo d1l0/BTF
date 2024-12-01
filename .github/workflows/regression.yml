@@ -43,7 +43,4 @@ jobs:
         files: ./coverage.xml
         flags: unittests
         fail_ci_if_error: true
-    - name: Annotate uncovered lines
-      run: |
-        . . venv/bin/activate
-        python annotate_coverage.py
+
