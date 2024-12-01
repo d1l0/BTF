@@ -41,7 +41,24 @@ Test Cases:
 
 12. **test_create_container_missing_image**:
     - Verifies that when the 'Image' field is missing, the API sets it to the default value of 'ubuntu'.
+
+13. **test_create_duplicate_container**:
+    - Tests how the API handles creating a container with the same 'Hostname' as an existing container. Verifies that the API rejects duplicates with a 400 error.
+
+14. **test_create_container_invalid_format**:
+    - Verifies that the API correctly handles a request body that is not in JSON format by returning a 400 error.
+
+15. **test_create_container_large_payload**:
+    - Ensures the API handles excessively large payloads gracefully, either accepting them or returning a 413 error.
+
+16. **test_create_container_special_characters_in_image**:
+    - Ensures the API correctly handles special characters in the 'Image' field and stores the provided value without validation.
+
+17. **test_create_container_case_sensitive_hostname**:
+    - Verifies if the 'Hostname' is treated as case-sensitive by the API. Tests creating containers with hostnames differing only in case.
 """
+
+import pytest
 
 
 def test_create_container_and_verify_in_db(test_client, sample_data):
@@ -213,3 +230,51 @@ def test_create_container_missing_image(test_client, sample_data):
 
     # Verify the missing "Image" field is set to default "ubuntu"
     assert created_container['Image'] == 'ubuntu'
+
+@pytest.mark.xfail(reason="Known bug: [Hostname must be unique]", strict=True)
+def test_create_duplicate_container(test_client, sample_data):
+    """
+    Test creating a container with a duplicate 'Hostname'
+    """
+    # Create the first container
+    response_1 = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response_1.status_code == 201
+
+    # Create a second container with the same 'Hostname'
+    response_2 = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response_2.status_code == 400  # Assuming duplicates are not allowed
+    assert response_2.json == {'error': 'Duplicate container. Hostname must be unique.'}
+
+
+def test_create_container_invalid_format(test_client):
+    """
+    Test creating a container with an invalid request format (non-JSON body)
+    """
+    response = test_client.post('/orchestrator/containers', data="not a json")
+    assert response.status_code == 415
+
+
+def test_create_container_large_payload(test_client):
+    """
+    Test creating a container with an excessively large payload
+    """
+    large_payload = {
+        'Hostname': 'a' * 1024,  # Very long hostname
+        'Entrypoint': 'b' * 2048,  # Large entrypoint value
+        'Image': 'ubuntu'
+    }
+
+    response = test_client.post('/orchestrator/containers', json=large_payload)
+    assert response.status_code in (201, 413)  # 413 Payload Too Large if size is restricted
+
+
+def test_create_container_special_characters_in_image(test_client):
+    """
+    Test creating a container with special characters in the 'Image' field
+    """
+    data = {'Hostname': 'test-host', 'Entrypoint': '', 'Image': 'invalid#:!@#$%^&*()image!'}
+
+    response = test_client.post('/orchestrator/containers', json=data)
+    assert response.status_code == 201  # Assuming no validation on Image
+    created_container = response.json
+    assert created_container['Image'] == 'invalid#:!@#$%^&*()image!'

@@ -25,7 +25,21 @@ Test Cases:
 5. **test_delete_invalid_container_id**:
     - Tests the scenario where an invalid container ID format (e.g., a string instead of an integer) is provided for deletion.
     - The API should return a 404 error, as Flask does not route such requests to the proper endpoint.
+
+6. **test_delete_unauthorized**:
+    - Verifies that the API correctly responds with a 403 error when an unauthorized user attempts to delete a container.
+
+Additional TC's (Not Implemented): #TODO
+
+7. **test_delete_with_dependencies**:
+    - Tests deleting a container that has active dependencies, ensuring that the API either prevents deletion or handles it properly.
+
+8. **test_bulk_delete_containers**:
+    - Verifies that multiple containers can be deleted in a single bulk deletion request.
+    - Ensures proper handling of both valid and invalid container IDs in the bulk request.
 """
+import pytest
+
 
 def test_delete_existing_container(test_client, sample_data):
     """
@@ -107,3 +121,22 @@ def test_delete_invalid_container_id(test_client):
     # Attempt to delete using an invalid ID format (e.g., string)
     response = test_client.delete('/orchestrator/containers/invalid_id')
     assert response.status_code == 404  # Flask default behavior for invalid route
+
+@pytest.mark.xfail(reason="Known bug: [Authorization isn't implemented]", strict=True)
+def test_delete_unauthorized(test_client, sample_data):
+    """
+    Test attempting to delete a container without proper authorization
+    """
+    # Assuming some form of authorization is required (e.g., API key, token)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response.status_code == 201
+    created_container = response.json
+
+    # Attempt to delete the container without authorization
+    response = test_client.delete(
+        f'/orchestrator/containers/{created_container["id"]}',
+        headers={"Authorization": "InvalidToken"}
+    )
+    assert response.status_code == 403
+    assert response.json == {'error': 'Unauthorized to delete the container'}
+

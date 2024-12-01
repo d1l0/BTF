@@ -40,6 +40,12 @@ Test Cases:
      - All responses contain the same consistent data, including all containers added to the database.
    - **Notes**:
      - Marked as `xfail` because the Flask client does not support true concurrent requests.
+8. **test_get_all_containers_response_headers**:
+   - Confirms the response headers include proper metadata such as `Content-Type`.
+
+Additional. playing with  query string #TODO
+9. **test_get_all_containers_with_pagination**:
+   - Validates that the endpoint handles pagination parameters (`limit`, `offset`) correctly, returning the appropriate subset of containers.
 
 ---
 Objective:
@@ -200,3 +206,50 @@ def test_concurrent_get_all_containers_concurrent(test_client, fetch_containers,
         assert len(result) == 5  # Verify all 5 containers are returned
         for i in range(5):
             assert any(container['Hostname'] == f'container-{i}' for container in result)
+
+
+def test_get_all_containers_response_headers(test_client):
+    """
+    Test the response headers of GET /orchestrator/containers
+    """
+    response = test_client.get('/orchestrator/containers')
+    assert response.status_code in [200, 400]  # Depends on initial state
+    assert 'Content-Type' in response.headers
+    assert response.headers['Content-Type'] == 'application/json'
+
+
+@pytest.mark.xfail(reason="Known bug: [Query strings aren't implemented]", strict=True)
+def test_get_all_containers_with_pagination(test_client, sample_data):
+    """
+    Test getting containers with pagination parameters
+    """
+    # Add multiple containers
+    for i in range(10):
+        container_data = sample_data.copy()
+        container_data['Hostname'] = f'container-{i}'
+        response = test_client.post('/orchestrator/containers', json=container_data)
+        assert response.status_code == 201
+
+    # Fetch the first 5 containers
+    response = test_client.get('/orchestrator/containers?limit=5&offset=0')
+    assert response.status_code == 200
+    containers = response.json
+
+    # Verify only the first 5 containers are returned
+    assert len(containers) == 5
+    for i in range(5):
+        assert containers[i]['Hostname'] == f'container-{i}'
+
+
+@pytest.mark.xfail(reason="Known bug: [Query strings aren't implemented]", strict=True)
+def test_get_all_containers_empty_with_query(test_client):
+    """
+    Test fetching containers with query parameters that result in no matches
+    """
+    # Fetch containers with a query parameter that doesn't match any container
+    response = test_client.get('/orchestrator/containers?name=nonexistent')
+    assert response.status_code == 200
+    containers = response.json
+
+    # Verify the response is an empty list
+    assert containers == []

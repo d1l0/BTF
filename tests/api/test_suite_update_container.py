@@ -7,42 +7,47 @@ Test Cases:
 -------------
 1. **test_update_existing_container**:
     - Verifies that a container can be successfully updated with valid data.
-    - The test creates a container, updates its `Hostname` and `Entrypoint`, and ensures the container is correctly updated.
-    - The response is checked to ensure the updated fields match the new data, while unchanged fields remain the same.
 
 2. **test_update_non_existent_container**:
-    - Verifies that attempting to update a non-existent container (e.g., with an ID of `9999`) returns a `404 Not Found` response.
-    - The response should contain an error message indicating that the container was not found.
+    - Verifies that attempting to update a non-existent container returns a `404 Not Found` response.
 
 3. **test_update_no_data**:
     - Verifies that a `PUT` request with an empty JSON body does not modify the container.
-    - The test creates a container, sends an empty JSON body to update it, and ensures the container remains unchanged.
 
 4. **test_update_partial_data**:
     - Verifies that partial updates to a container are correctly applied.
-    - The test updates only the `Hostname` field of a container, leaving other fields (like `Entrypoint` and `Image`) unchanged.
-    - The response is checked to ensure only the `Hostname` is updated, while other fields remain as before.
 
 5. **test_update_invalid_fields**:
-    - Verifies that attempting to update a container with invalid fields (i.e., fields not expected by the API) does not change the container's data.
-    - The test attempts to update a container with invalid fields and ensures the container remains unchanged.
+    - Verifies that invalid fields in the update request do not affect the container's data.
 
 6. **test_update_invalid_id_format**:
-    - Verifies that attempting to update a container with an invalid ID format (e.g., a string instead of a numeric ID) results in a `404 Not Found` response.
-    - This ensures that the API correctly handles invalid ID formats.
+    - Verifies that invalid ID formats in the update request result in a `404 Not Found` response.
 
 7. **test_update_no_json_body**:
-    - Verifies that attempting to update a container without providing a JSON body results in a `415 Unsupported Media Type` response.
-    - This ensures that the API enforces the requirement for a JSON payload when updating a container.
+    - Verifies that attempting to update a container without a JSON body results in a `415 Unsupported Media Type` response.
 
 8. **test_update_all_fields**:
     - Verifies that all fields of a container can be updated simultaneously.
-    - The test creates a container and updates all fields (`Hostname`, `Entrypoint`, and `Image`). The response is checked to ensure all fields are updated accordingly.
 
 9. **test_update_multiple_containers**:
-    - Verifies that multiple containers can be updated independently of each other.
-    - The test creates two containers, updates each with different data, and ensures each container is updated correctly without affecting the other.
+    - Verifies that multiple containers can be updated independently.
+
+10. **test_update_with_additional_unexpected_fields**:
+    - Ensures the API ignores unexpected fields while updating valid fields.
+
+11. **test_update_with_large_input**:
+    - Verifies that the API handles extremely large inputs gracefully.
+
+12. **test_concurrent_updates**:
+    - Ensures the API handles concurrent updates to the same container without race conditions.
+
+13. **test_update_read_only_fields**:
+    - Ensures the API does not allow updates to read-only fields like `id`.
 """
+
+import concurrent.futures
+import pytest
+
 
 def test_update_existing_container(test_client, sample_data):
     """
@@ -198,3 +203,98 @@ def test_update_multiple_containers(test_client, sample_data):
     assert updated_container_2['Entrypoint'] == updated_data_2['Entrypoint']
     assert updated_container_1['Entrypoint'] == container_1['Entrypoint']
     assert updated_container_2['Hostname'] == container_2['Hostname']
+
+
+def test_update_with_additional_unexpected_fields(test_client, sample_data):
+    """
+    Test updating a container with both valid and unexpected fields
+    """
+    # Create a container
+    response = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response.status_code == 201
+    created_container = response.json
+
+    # Attempt to update with valid and unexpected fields
+    updated_data = {
+        'Hostname': 'updated.hostname',
+        'ExtraField': 'extra_value'
+    }
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
+    assert response.status_code == 200
+    updated_container = response.json
+
+    # Verify only valid fields are updated
+    assert updated_container['Hostname'] == updated_data['Hostname']
+    assert 'UnexpectedField' not in updated_container
+
+
+def test_update_with_large_input(test_client, sample_data):
+    """
+    Test updating a container with extremely large field values
+    """
+    # Create a container
+    response = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response.status_code == 201
+    created_container = response.json
+
+    # Update with large input
+    large_data = {
+        'Hostname': 'a' * 1024,
+        'Entrypoint': 'b' * 2048
+    }
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json=large_data)
+    assert response.status_code in (200, 413)  # API may enforce size limits
+
+
+@pytest.mark.xfail(reason="Known bug: [Flask client doesn't support concurrent requests]", strict=True)
+def test_concurrent_updates(test_client, sample_data):
+    """
+    Test concurrent updates to the same container
+    """
+    # Create a container
+    response = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response.status_code == 201
+    created_container = response.json
+
+    # Define update functions
+    def update_hostname():
+        return test_client.put(
+            f'/orchestrator/containers/{created_container["id"]}',
+            json={'Hostname': 'updated.hostname'}
+        )
+
+    def update_entrypoint():
+        return test_client.put(
+            f'/orchestrator/containers/{created_container["id"]}',
+            json={'Entrypoint': 'updated.entrypoint'}
+        )
+
+    # Simulate concurrent updates
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        futures = [executor.submit(update_hostname), executor.submit(update_entrypoint)]
+        results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+    # Verify all responses are 200
+    for result in results:
+        assert result.status_code == 200
+
+
+def test_update_read_only_fields(test_client, sample_data):
+    """
+    Test attempting to update read-only fields
+    """
+    # Create a container
+    response = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response.status_code == 201
+    created_container = response.json
+
+    # Attempt to update read-only fields
+    updated_data = {'id': 1010, 'Hostname': 'new.hostname'}
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
+    assert response.status_code == 200
+    updated_container = response.json
+
+    # Verify read-only fields are not updated
+    assert updated_container['id'] == created_container['id']  # ID should remain unchanged
+    assert updated_container['Hostname'] == updated_data['Hostname']
+
