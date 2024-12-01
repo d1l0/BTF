@@ -173,7 +173,8 @@ def test_create_container_id_increment(test_client, sample_data):
 
 def test_create_container_long_hostname(test_client):
     """
-    Test creating a container with a very long 'Hostname'
+    Test creating a container with a very long 'Hostname'.
+    Value is just for example, it can be changed to really long one
     """
     long_hostname = 'a' * 256  # 256 characters
     data = {'Hostname': long_hostname, 'Entrypoint': '', 'Image': 'ubuntu'}
