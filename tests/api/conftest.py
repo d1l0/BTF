@@ -3,7 +3,7 @@ import pytest
 from tools.api import app, db  # Import the Flask app and in-memory database
 
 @pytest.fixture
-def client():
+def test_client():
     """Test client fixture"""
     with app.test_client() as client:
         yield client  # Provide the test client for tests
@@ -23,7 +23,7 @@ def sample_data():
     }
 
 @pytest.fixture
-def fetch_containers(client):
+def fetch_containers(test_client):
     """
     Fixture to fetch all containers using the GET /orchestrator/containers endpoint.
 
@@ -34,7 +34,7 @@ def fetch_containers(client):
         A callable that fetches and returns all containers.
     """
     def _fetch_containers():
-        response = client.get('/orchestrator/containers')
+        response = test_client.get('/orchestrator/containers')
         assert response.status_code == 200, "Failed to fetch containers"
         return response.json
 

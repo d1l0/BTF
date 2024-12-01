@@ -44,18 +44,18 @@ Test Cases:
     - The test creates two containers, updates each with different data, and ensures each container is updated correctly without affecting the other.
 """
 
-def test_update_existing_container(client, sample_data):
+def test_update_existing_container(test_client, sample_data):
     """
     Test updating an existing container with valid data
     """
     # Create a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Update the container
     updated_data = {'Hostname': 'updated.hostname', 'Entrypoint': 'updated-entrypoint'}
-    response = client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
     assert response.status_code == 200
     updated_container = response.json
 
@@ -64,44 +64,44 @@ def test_update_existing_container(client, sample_data):
     assert updated_container['Entrypoint'] == updated_data['Entrypoint']
     assert updated_container['Image'] == created_container['Image']  # Ensure unchanged fields remain the same
 
-def test_update_non_existent_container(client):
+def test_update_non_existent_container(test_client):
     """
     Test updating a non-existent container
     """
     updated_data = {'Hostname': 'new.hostname'}
-    response = client.put('/orchestrator/containers/9999', json=updated_data)
+    response = test_client.put('/orchestrator/containers/9999', json=updated_data)
     assert response.status_code == 404
     assert response.json == {'error': 'container not found'}
 
-def test_update_no_data(client, sample_data):
+def test_update_no_data(test_client, sample_data):
     """
     Test updating a container without providing any data
     """
     # Create a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Attempt to update without providing data
-    response = client.put(f'/orchestrator/containers/{created_container["id"]}', json={})
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json={})
     assert response.status_code == 200
     updated_container = response.json
 
     # Verify the container remains unchanged
     assert updated_container == created_container
 
-def test_update_partial_data(client, sample_data):
+def test_update_partial_data(test_client, sample_data):
     """
     Test updating a container with partial data
     """
     # Create a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Update only the Hostname
     updated_data = {'Hostname': 'partial.update.hostname'}
-    response = client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
     assert response.status_code == 200
     updated_container = response.json
 
@@ -110,51 +110,51 @@ def test_update_partial_data(client, sample_data):
     assert updated_container['Entrypoint'] == created_container['Entrypoint']
     assert updated_container['Image'] == created_container['Image']
 
-def test_update_invalid_fields(client, sample_data):
+def test_update_invalid_fields(test_client, sample_data):
     """
     Test updating a container with invalid fields
     """
     # Create a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Attempt to update with invalid fields
     invalid_data = {'InvalidField': 'some value', 'AnotherInvalidField': 123}
-    response = client.put(f'/orchestrator/containers/{created_container["id"]}', json=invalid_data)
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json=invalid_data)
     assert response.status_code == 200
     updated_container = response.json
 
     # Verify no changes were made
     assert updated_container == created_container
 
-def test_update_invalid_id_format(client):
+def test_update_invalid_id_format(test_client):
     """
     Test updating a container with invalid ID format
     """
     updated_data = {'Hostname': 'hostname'}
-    response = client.put('/orchestrator/containers/invalid_id', json=updated_data)
+    response = test_client.put('/orchestrator/containers/invalid_id', json=updated_data)
     assert response.status_code == 404  # Flask default behavior for invalid route
 
-def test_update_no_json_body(client, sample_data):
+def test_update_no_json_body(test_client, sample_data):
     """
     Test updating a container with no JSON body
     """
     # Create a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Attempt to update without a JSON body
-    response = client.put(f'/orchestrator/containers/{created_container["id"]}')
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}')
     assert response.status_code == 415
 
-def test_update_all_fields(client, sample_data):
+def test_update_all_fields(test_client, sample_data):
     """
     Test updating all fields of a container
     """
     # Create a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
@@ -164,7 +164,7 @@ def test_update_all_fields(client, sample_data):
         'Entrypoint': 'new-entrypoint',
         'Image': 'new-image'
     }
-    response = client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
+    response = test_client.put(f'/orchestrator/containers/{created_container["id"]}', json=updated_data)
     assert response.status_code == 200
     updated_container = response.json
 
@@ -173,23 +173,23 @@ def test_update_all_fields(client, sample_data):
     assert updated_container['Entrypoint'] == updated_data['Entrypoint']
     assert updated_container['Image'] == updated_data['Image']
 
-def test_update_multiple_containers(client, sample_data):
+def test_update_multiple_containers(test_client, sample_data):
     """
     Test updating multiple containers independently
     """
     # Create two containers
-    container_1 = client.post('/orchestrator/containers', json=sample_data).json
-    container_2 = client.post('/orchestrator/containers', json=sample_data).json
+    container_1 = test_client.post('/orchestrator/containers', json=sample_data).json
+    container_2 = test_client.post('/orchestrator/containers', json=sample_data).json
 
     # Update the first container
     updated_data_1 = {'Hostname': 'first.updated.hostname'}
-    response = client.put(f'/orchestrator/containers/{container_1["id"]}', json=updated_data_1)
+    response = test_client.put(f'/orchestrator/containers/{container_1["id"]}', json=updated_data_1)
     assert response.status_code == 200
     updated_container_1 = response.json
 
     # Update the second container
     updated_data_2 = {'Entrypoint': 'second.updated.entrypoint'}
-    response = client.put(f'/orchestrator/containers/{container_2["id"]}', json=updated_data_2)
+    response = test_client.put(f'/orchestrator/containers/{container_2["id"]}', json=updated_data_2)
     assert response.status_code == 200
     updated_container_2 = response.json
 

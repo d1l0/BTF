@@ -35,25 +35,25 @@ import concurrent.futures
 import pytest
 
 
-def test_get_all_containers_empty(client):
+def test_get_all_containers_empty(test_client):
     """
     Test getting all containers when the database is empty
     """
-    response = client.get('/orchestrator/containers')
+    response = test_client.get('/orchestrator/containers')
     assert response.status_code == 400
     assert response.json == {'error': 'containers are empty'}
 
-def test_get_all_containers_single_entry(client, sample_data):
+def test_get_all_containers_single_entry(test_client, sample_data):
     """
     Test getting all containers after adding a single container
     """
     # Add a single container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Fetch all containers
-    response = client.get('/orchestrator/containers')
+    response = test_client.get('/orchestrator/containers')
     assert response.status_code == 200
     containers = response.json
 
@@ -61,21 +61,21 @@ def test_get_all_containers_single_entry(client, sample_data):
     assert len(containers) == 1
     assert containers[0] == created_container
 
-def test_get_all_containers_multiple_entries(client, sample_data):
+def test_get_all_containers_multiple_entries(test_client, sample_data):
     """
     Test getting all containers after adding multiple containers
     """
     # Add multiple containers
-    response_1 = client.post('/orchestrator/containers', json=sample_data)
+    response_1 = test_client.post('/orchestrator/containers', json=sample_data)
     assert response_1.status_code == 201
     container_1 = response_1.json
 
-    response_2 = client.post('/orchestrator/containers', json=sample_data)
+    response_2 = test_client.post('/orchestrator/containers', json=sample_data)
     assert response_2.status_code == 201
     container_2 = response_2.json
 
     # Fetch all containers
-    response = client.get('/orchestrator/containers')
+    response = test_client.get('/orchestrator/containers')
     assert response.status_code == 200
     containers = response.json
 
@@ -84,16 +84,16 @@ def test_get_all_containers_multiple_entries(client, sample_data):
     assert container_1 in containers
     assert container_2 in containers
 
-def test_get_all_containers_structure(client, sample_data):
+def test_get_all_containers_structure(test_client, sample_data):
     """
     Test the structure of the response when fetching all containers
     """
     # Add a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
 
     # Fetch all containers
-    response = client.get('/orchestrator/containers')
+    response = test_client.get('/orchestrator/containers')
     assert response.status_code == 200
     containers = response.json
 
@@ -104,7 +104,7 @@ def test_get_all_containers_structure(client, sample_data):
         assert 'Entrypoint' in container
         assert 'Image' in container
 
-def test_get_all_containers_varied_data(client):
+def test_get_all_containers_varied_data(test_client):
     """
     Test getting containers when there are multiple with different configurations
     """
@@ -112,16 +112,16 @@ def test_get_all_containers_varied_data(client):
     container_1 = {'Hostname': 'container1', 'Entrypoint': '/bin/bash', 'Image': 'alpine'}
     container_2 = {'Hostname': 'container2', 'Entrypoint': '/start.sh', 'Image': 'nginx'}
 
-    response_1 = client.post('/orchestrator/containers', json=container_1)
+    response_1 = test_client.post('/orchestrator/containers', json=container_1)
     assert response_1.status_code == 201
     created_1 = response_1.json
 
-    response_2 = client.post('/orchestrator/containers', json=container_2)
+    response_2 = test_client.post('/orchestrator/containers', json=container_2)
     assert response_2.status_code == 201
     created_2 = response_2.json
 
     # Fetch all containers
-    response = client.get('/orchestrator/containers')
+    response = test_client.get('/orchestrator/containers')
     assert response.status_code == 200
     containers = response.json
 
@@ -132,20 +132,20 @@ def test_get_all_containers_varied_data(client):
 
 
 @pytest.mark.xfail(reason="Known bug: [Query strings aren't implemented]", strict=True)
-def test_get_all_containers_multiple_entries_with_query(client, sample_data):
+def test_get_all_containers_multiple_entries_with_query(test_client, sample_data):
     """
     Test getting filtered containers list. One container should return
     """
     # Add multiple containers
-    response_1 = client.post('/orchestrator/containers', json=sample_data)
+    response_1 = test_client.post('/orchestrator/containers', json=sample_data)
     assert response_1.status_code == 201
     container_1 = response_1.json
 
-    response_2 = client.post('/orchestrator/containers', json=sample_data)
+    response_2 = test_client.post('/orchestrator/containers', json=sample_data)
     assert response_2.status_code == 201
 
     # Fetch all containers with query string for only 1 container
-    response = client.get('/orchestrator/containers?count=1')
+    response = test_client.get('/orchestrator/containers?count=1')
     assert response.status_code == 200
     containers = response.json
 
@@ -154,7 +154,7 @@ def test_get_all_containers_multiple_entries_with_query(client, sample_data):
     assert container_1 in containers
 
 @pytest.mark.xfail(reason="Known bug: [Flask client doesn't support concurrent requests]", strict=True)
-def test_concurrent_get_all_containers_concurrent(client, fetch_containers, sample_data):
+def test_concurrent_get_all_containers_concurrent(test_client, fetch_containers, sample_data):
     """
     Test the GET /orchestrator/containers endpoint under concurrent requests
     """
@@ -162,7 +162,7 @@ def test_concurrent_get_all_containers_concurrent(client, fetch_containers, samp
     for i in range(5):
         container_data = sample_data.copy()
         container_data['Hostname'] = f'container-{i}'
-        response = client.post('/orchestrator/containers', json=container_data)
+        response = test_client.post('/orchestrator/containers', json=container_data)
         assert response.status_code == 201
 
     # Verify initial state using fetch_containers

@@ -27,83 +27,83 @@ Test Cases:
     - The API should return a 404 error, as Flask does not route such requests to the proper endpoint.
 """
 
-def test_delete_existing_container(client, sample_data):
+def test_delete_existing_container(test_client, sample_data):
     """
     Test the DELETE /orchestrator/containers/<id> route with an existing container
     """
     # Create a container first
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Delete the created container
-    response = client.delete(f'/orchestrator/containers/{created_container["id"]}')
+    response = test_client.delete(f'/orchestrator/containers/{created_container["id"]}')
     assert response.status_code == 200
     assert response.json == {'message': f'container {created_container["id"]} deleted'}
 
     # Verify the container is actually deleted
-    response = client.get(f'/orchestrator/containers/{created_container["id"]}')
+    response = test_client.get(f'/orchestrator/containers/{created_container["id"]}')
     assert response.status_code == 404
     assert response.json == {'error': 'container not found'}
 
-def test_delete_non_existent_container(client):
+def test_delete_non_existent_container(test_client):
     """
     Test the DELETE /orchestrator/containers/<id> route with a non-existent container
     """
     # Attempt to delete a container that doesn't exist
-    response = client.delete('/orchestrator/containers/9999')
+    response = test_client.delete('/orchestrator/containers/9999')
     assert response.status_code == 404
     assert response.json == {'error': 'container not found'}
 
-def test_delete_same_container_twice(client, sample_data):
+def test_delete_same_container_twice(test_client, sample_data):
     """
     Test multiple deletions on the same container ID
     """
     # Create a container
-    response = client.post('/orchestrator/containers', json=sample_data)
+    response = test_client.post('/orchestrator/containers', json=sample_data)
     assert response.status_code == 201
     created_container = response.json
 
     # Delete the container the first time
-    response = client.delete(f'/orchestrator/containers/{created_container["id"]}')
+    response = test_client.delete(f'/orchestrator/containers/{created_container["id"]}')
     assert response.status_code == 200
     assert response.json == {'message': f'container {created_container["id"]} deleted'}
 
     # Try deleting the same container again
-    response = client.delete(f'/orchestrator/containers/{created_container["id"]}')
+    response = test_client.delete(f'/orchestrator/containers/{created_container["id"]}')
     assert response.status_code == 404
     assert response.json == {'error': 'container not found'}
 
-def test_delete_all_containers(client, sample_data):
+def test_delete_all_containers(test_client, sample_data):
     """
     Test deleting all containers one by one
     """
     # Create multiple containers
     for _ in range(3):
-        response = client.post('/orchestrator/containers', json=sample_data)
+        response = test_client.post('/orchestrator/containers', json=sample_data)
         assert response.status_code == 201
 
     # Verify all containers exist
-    response = client.get('/orchestrator/containers')
+    response = test_client.get('/orchestrator/containers')
     assert response.status_code == 200
     containers = response.json
     assert len(containers) == 3
 
     # Delete each container
     for container in containers:
-        response = client.delete(f'/orchestrator/containers/{container["id"]}')
+        response = test_client.delete(f'/orchestrator/containers/{container["id"]}')
         assert response.status_code == 200
         assert response.json == {'message': f'container {container["id"]} deleted'}
 
     # Verify no containers remain
-    response = client.get('/orchestrator/containers')
+    response = test_client.get('/orchestrator/containers')
     assert response.status_code == 400
     assert response.json == {'error': 'containers are empty'}
 
-def test_delete_invalid_container_id(client):
+def test_delete_invalid_container_id(test_client):
     """
     Test deleting a container with invalid ID format
     """
     # Attempt to delete using an invalid ID format (e.g., string)
-    response = client.delete('/orchestrator/containers/invalid_id')
+    response = test_client.delete('/orchestrator/containers/invalid_id')
     assert response.status_code == 404  # Flask default behavior for invalid route

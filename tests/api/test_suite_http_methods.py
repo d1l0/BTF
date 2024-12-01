@@ -22,32 +22,32 @@ Test Cases:
 
 import pytest
 
-def test_method_not_allowed(client):
+def test_method_not_allowed(test_client):
     """
     Test that the API correctly responds with a 405 error for not-allowed HTTP methods.
     """
     # Attempt to use a PATCH method on the /orchestrator/containers endpoint
-    response = client.patch('/orchestrator/containers')
+    response = test_client.patch('/orchestrator/containers')
     assert response.status_code == 405
     assert response.json == {
         'error': 'Method PATCH not allowed on /orchestrator/containers'
     }
 
-def test_method_not_allowed_id(client):
+def test_method_not_allowed_id(test_client):
     """
     Attempt to use a PATCH method on a specific container endpoint
     """
-    response = client.patch('/orchestrator/containers/1')
+    response = test_client.patch('/orchestrator/containers/1')
     assert response.status_code == 405
     assert response.json == {
         'error': 'Method PATCH not allowed on /orchestrator/containers/1'
     }
 
 @pytest.mark.parametrize("method", ['OPTIONS', 'PUT', 'GET', 'DELETE', 'HEAD'])
-def test_method_allowed_list(client, method):
+def test_method_allowed_list(test_client, method):
     """
     Attempt to use OPTIONS on an endpoint with no OPTIONS route
     """
-    response = client.options('/orchestrator/containers/1')
+    response = test_client.options('/orchestrator/containers/1')
     assert response.status_code == 200
     assert method in response.headers['Allow']
