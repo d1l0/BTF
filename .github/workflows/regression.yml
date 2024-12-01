@@ -35,7 +35,7 @@ jobs:
     - name: Run tests and collect coverage
       run: |
         . venv/bin/activate
-        pytest --cov=tools/ --cov-report=xml --cov-report=term  --cov-config=tools/.coveragerc
+        pytest --cov=tools/ --cov-report=term  --cov-config=tools/.coveragerc --cov-report=xml > coverage_report.txt
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
@@ -43,3 +43,6 @@ jobs:
         files: ./coverage.xml
         flags: unittests
         fail_ci_if_error: true
+    - name: Append Coverage Summary to Job Summary
+      run: |
+        python tools/append_coverage_summary.py
