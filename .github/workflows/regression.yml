@@ -35,7 +35,7 @@ jobs:
     - name: Run tests and collect coverage
       run: |
         . venv/bin/activate
-        pytest --cov=tools/ --cov-report=xml
+        pytest --cov=tools/ --cov-report=xml --cov-config=tools/.coveragerc
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:

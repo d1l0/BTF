@@ -90,4 +90,4 @@ The repository includes a pre-configured GitHub Actions workflow for:
 ---
 
 ## Code Coverage
-[![codecov](https://codecov.io/github/d1l0/BTF/graph/badge.svg?token=ZVVY452S42)](https://codecov.io/github/d1l0/BTF)
+- Code Coverage latest results: [![codecov](https://codecov.io/github/d1l0/BTF/graph/badge.svg?token=ZVVY452S42)](https://codecov.io/github/d1l0/BTF)
