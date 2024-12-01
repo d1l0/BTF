@@ -93,16 +93,5 @@ def method_not_allowed(_):
     return jsonify({'error': f'Method {request.method} not allowed on {request.path}'}), 405
 
 
-@app.route('/orchestrator/containers', methods=['OPTIONS'])
-@app.route('/orchestrator/containers/<int:container_id>', methods=['OPTIONS'])
-def options_handler():
-    """
-    Optional: Define allowed methods explicitly for clarity
-    """
-    return jsonify({
-        'allowed_methods': ['GET', 'POST', 'PUT', 'DELETE']
-    }), 200
-
-
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8888)
+    pass

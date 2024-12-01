@@ -43,11 +43,30 @@ def test_method_not_allowed_id(test_client):
         'error': 'Method PATCH not allowed on /orchestrator/containers/1'
     }
 
-@pytest.mark.parametrize("method", ['OPTIONS', 'PUT', 'GET', 'DELETE', 'HEAD'])
-def test_method_allowed_list(test_client, method):
+def test_method_head(test_client, sample_data):
     """
-    Attempt to use OPTIONS on an endpoint with no OPTIONS route
+    Attempt to use a PATCH method on a specific container endpoint
+    """
+    response = test_client.post('/orchestrator/containers', json=sample_data)
+    assert response.status_code == 201
+
+    response = test_client.head('/orchestrator/containers')
+    assert response.status_code == 200
+
+@pytest.mark.parametrize("method", ['OPTIONS', 'PUT', 'GET', 'DELETE', 'HEAD'])
+def test_method_in_allowed_list(test_client, method):
+    """
+    Verify that ['OPTIONS', 'PUT', 'GET', 'DELETE', 'HEAD'] are available an endpoint route
     """
     response = test_client.options('/orchestrator/containers/1')
     assert response.status_code == 200
     assert method in response.headers['Allow']
+
+@pytest.mark.parametrize("method", ['PUT', 'DELETE'])
+def test_method_not_in_allowed_list(test_client, method):
+    """
+    Verify that ['PUT', 'DELETE'] aren't available an endpoint with no ['PUT', 'DELETE'] route
+    """
+    response = test_client.options('/orchestrator/containers')
+    assert response.status_code == 200
+    assert method not in response.headers['Allow']
