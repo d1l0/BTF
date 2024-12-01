@@ -24,7 +24,24 @@ Test Cases:
 5. **test_get_all_containers_varied_data**:
    - Verifies that the endpoint correctly handles and returns containers with varied configurations.
    - Ensures the database maintains distinct entries and data integrity for multiple containers.
+6. **test_get_all_containers_multiple_entries_with_query**:
+   - Validates the behavior of the `GET /orchestrator/containers` endpoint when query parameters are provided.
+   - Adds multiple containers to the database and sends a request with a query parameter (`count=1`) to fetch only one container.
+   - **Expected Outcome**:
+     - The response contains exactly one container.
+     - The returned container matches one of the containers previously added to the database.
+   - **Notes**:
+     - Marked as `xfail` because query string support is not implemented in the API.
 
+7. **test_concurrent_get_all_containers_concurrent**:
+   - Ensures the `GET /orchestrator/containers` endpoint handles multiple concurrent requests gracefully.
+   - Adds multiple containers to the database and simulates 10 concurrent `GET` requests to the endpoint using a thread pool.
+   - **Expected Outcome**:
+     - All responses contain the same consistent data, including all containers added to the database.
+   - **Notes**:
+     - Marked as `xfail` because the Flask client does not support true concurrent requests.
+
+---
 Objective:
 - Validate the `GET /orchestrator/containers` endpoint's functionality, structure, and error handling across different scenarios.
 
