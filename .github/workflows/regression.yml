@@ -35,7 +35,7 @@ jobs:
     - name: Run tests and collect coverage
       run: |
         . venv/bin/activate
-        pytest --cov=tools/ --cov-report=xml --cov-config=tools/.coveragerc
+        pytest --cov=tools/ --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
@@ -43,4 +43,7 @@ jobs:
         files: ./coverage.xml
         flags: unittests
         fail_ci_if_error: true
-
+    - name: Annotate uncovered lines
+      run: |
+        . . venv/bin/activate
+        python annotate_coverage.py
