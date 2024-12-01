@@ -48,7 +48,7 @@ if __name__ == "__main__":
     SUMMARY = extract_coverage_summary(REPORT_PATH)
     github_summary_path = os.getenv("GITHUB_STEP_SUMMARY")
     if github_summary_path:
-        with open(github_summary_path, "a") as summary_file:
+        with open(github_summary_path, "a", encoding="utf-8") as summary_file:
             summary_file.write(SUMMARY + "\n")
     else:
         print("::error::GITHUB_STEP_SUMMARY environment variable not found!")
