@@ -46,4 +46,4 @@ jobs:
     - name: Annotate uncovered lines
       run: |
         . ./venv/bin/activate
-        python annotate_coverage.py
+        python tools/annotate_coverage.py
