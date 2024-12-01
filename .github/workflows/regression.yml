@@ -45,5 +45,5 @@ jobs:
         fail_ci_if_error: true
     - name: Annotate uncovered lines
       run: |
-        . . venv/bin/activate
+        . ./venv/bin/activate
         python annotate_coverage.py
