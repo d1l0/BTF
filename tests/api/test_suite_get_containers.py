@@ -31,6 +31,7 @@ Objective:
 Usage:
 - Run this test suite with pytest to ensure the `GET /orchestrator/containers` endpoint behaves as expected.
 """
+import pytest
 
 def test_get_all_containers_empty(client):
     """
@@ -126,3 +127,27 @@ def test_get_all_containers_varied_data(client):
     assert len(containers) == 2
     assert created_1 in containers
     assert created_2 in containers
+
+
+@pytest.mark.xfail(reason="Known bug: [Query strings aren't implemented]", strict=True)
+def test_get_all_containers_multiple_entries_with_query(client, sample_data):
+    """
+    Test getting filtered containers list. One container should return
+    """
+    # Add multiple containers
+    response_1 = client.post('/orchestrator/containers', json=sample_data)
+    assert response_1.status_code == 201
+    container_1 = response_1.json
+
+    response_2 = client.post('/orchestrator/containers', json=sample_data)
+    assert response_2.status_code == 201
+    container_2 = response_2.json
+
+    # Fetch all containers with query string for only 1 container
+    response = client.get('/orchestrator/containers?count=1')
+    assert response.status_code == 200
+    containers = response.json
+
+    # Verify the fetched only 1 container
+    assert len(containers) == 1
+    assert container_1 in containers
