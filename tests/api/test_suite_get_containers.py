@@ -31,8 +31,8 @@ Objective:
 Usage:
 - Run this test suite with pytest to ensure the `GET /orchestrator/containers` endpoint behaves as expected.
 """
-import pytest
 import concurrent.futures
+import pytest
 
 
 def test_get_all_containers_empty(client):
@@ -143,7 +143,6 @@ def test_get_all_containers_multiple_entries_with_query(client, sample_data):
 
     response_2 = client.post('/orchestrator/containers', json=sample_data)
     assert response_2.status_code == 201
-    container_2 = response_2.json
 
     # Fetch all containers with query string for only 1 container
     response = client.get('/orchestrator/containers?count=1')

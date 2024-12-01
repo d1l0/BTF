@@ -15,8 +15,8 @@ def extract_coverage_summary(report_file):
     summary_lines = []
     in_summary_section = False
 
-    with open(report_file, "r") as f:
-        for line in f:
+    with open(report_file, "r", encoding="utf-8") as reports:
+        for line in reports:
             # Check if we are in the summary section
             if "Name" in line and "Stmts" in line and "Cover" in line:
                 in_summary_section = True
@@ -39,17 +39,17 @@ def extract_coverage_summary(report_file):
 
 if __name__ == "__main__":
     # Get the path to the pytest report
-    report_path = "coverage_report.txt"
-    if not os.path.exists(report_path):
+    REPORT_PATH = "coverage_report.txt"
+    if not os.path.exists(REPORT_PATH):
         print("::error::Coverage report not found!")
         sys.exit(1)
 
     # Extract and append the coverage summary
-    summary = extract_coverage_summary(report_path)
+    SUMMARY = extract_coverage_summary(REPORT_PATH)
     github_summary_path = os.getenv("GITHUB_STEP_SUMMARY")
     if github_summary_path:
-        with open(github_summary_path, "a") as f:
-            f.write(summary + "\n")
+        with open(github_summary_path, "a") as summary_file:
+            summary_file.write(SUMMARY + "\n")
     else:
         print("::error::GITHUB_STEP_SUMMARY environment variable not found!")
         sys.exit(1)
