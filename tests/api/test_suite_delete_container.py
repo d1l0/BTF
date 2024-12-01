@@ -139,4 +139,3 @@ def test_delete_unauthorized(test_client, sample_data):
     )
     assert response.status_code == 403
     assert response.json == {'error': 'Unauthorized to delete the container'}
-

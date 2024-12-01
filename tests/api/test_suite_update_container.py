@@ -297,4 +297,3 @@ def test_update_read_only_fields(test_client, sample_data):
     # Verify read-only fields are not updated
     assert updated_container['id'] == created_container['id']  # ID should remain unchanged
     assert updated_container['Hostname'] == updated_data['Hostname']
-

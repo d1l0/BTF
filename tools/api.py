@@ -1,7 +1,9 @@
+"""Basic Flask API for testing"""
 from flask import Flask, jsonify, request
-import jwt
 from datetime import datetime, timedelta
 from functools import wraps
+import jwt
+
 
 app = Flask(__name__)
 

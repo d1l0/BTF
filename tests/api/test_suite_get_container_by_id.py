@@ -129,11 +129,11 @@ def test_get_container_among_multiple(test_client, sample_data):
     assert fetched_container['id'] == container_2['id']
 
 def test_get_container_special_characters_in_id(test_client):
-        """
-        Test getting a container with special characters in the ID
-        """
-        response = test_client.get('/orchestrator/containers/!@#')
-        assert response.status_code == 404  # Flask default behavior for invalid route
+    """
+    Test getting a container with special characters in the ID
+    """
+    response = test_client.get('/orchestrator/containers/!@#')
+    assert response.status_code == 404  # Flask default behavior for invalid route
 
 def test_get_container_id_overflow(test_client):
     """
@@ -176,4 +176,3 @@ def test_get_container_response_headers(test_client, sample_data):
     assert response.status_code in [200, 400]  # Depends on initial state
     assert 'Content-Type' in response.headers
     assert response.headers['Content-Type'] == 'application/json'
-
