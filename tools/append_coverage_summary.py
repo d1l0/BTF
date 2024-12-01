@@ -30,6 +30,8 @@ def extract_coverage_summary(report_file):
     markdown_summary += "```\n"
     markdown_summary += "\n".join(summary_lines)
     markdown_summary += "\n```"
+    markdown_summary +="- Code Coverage latest results: "
+    markdown_summary +="[![codecov](https://codecov.io/github/d1l0/BTF/graph/badge.svg?token=ZVVY452S42)](https://codecov.io/github/d1l0/BTF)"
     return markdown_summary
 
 
