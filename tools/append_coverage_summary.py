@@ -1,4 +1,6 @@
+"""Coverage summary report to job summary"""
 import os
+import sys
 
 def extract_coverage_summary(report_file):
     """
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     report_path = "coverage_report.txt"
     if not os.path.exists(report_path):
         print("::error::Coverage report not found!")
-        exit(1)
+        sys.exit(1)
 
     # Extract and append the coverage summary
     summary = extract_coverage_summary(report_path)
@@ -50,4 +52,4 @@ if __name__ == "__main__":
             f.write(summary + "\n")
     else:
         print("::error::GITHUB_STEP_SUMMARY environment variable not found!")
-        exit(1)
+        sys.exit(1)
