@@ -32,6 +32,8 @@ Usage:
 - Run this test suite with pytest to ensure the `GET /orchestrator/containers` endpoint behaves as expected.
 """
 import pytest
+import concurrent.futures
+
 
 def test_get_all_containers_empty(client):
     """
@@ -151,3 +153,34 @@ def test_get_all_containers_multiple_entries_with_query(client, sample_data):
     # Verify the fetched only 1 container
     assert len(containers) == 1
     assert container_1 in containers
+
+@pytest.mark.xfail(reason="Known bug: [Flask client doesn't support concurrent requests]", strict=True)
+def test_concurrent_get_all_containers_concurrent(client, fetch_containers, sample_data):
+    """
+    Test the GET /orchestrator/containers endpoint under concurrent requests
+    """
+    # Add multiple containers to the database
+    for i in range(5):
+        container_data = sample_data.copy()
+        container_data['Hostname'] = f'container-{i}'
+        response = client.post('/orchestrator/containers', json=container_data)
+        assert response.status_code == 201
+
+    # Verify initial state using fetch_containers
+    initial_containers = fetch_containers()
+    assert len(initial_containers) == 5
+
+    # Fetch all containers concurrently
+    num_concurrent_requests = 10  # Number of concurrent GET requests
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_concurrent_requests) as executor:
+        # Launch multiple GET requests concurrently
+        futures = [executor.submit(fetch_containers) for _ in range(num_concurrent_requests)]
+
+        # Collect and validate results
+        results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+    # Verify each response contains the correct number of containers
+    for result in results:
+        assert len(result) == 5  # Verify all 5 containers are returned
+        for i in range(5):
+            assert any(container['Hostname'] == f'container-{i}' for container in result)
