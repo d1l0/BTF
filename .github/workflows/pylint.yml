@@ -1,4 +1,4 @@
-name: Pylint
+name: Code Quality checker (Pylint)
 
 on:
   push:  # Trigger on push events
