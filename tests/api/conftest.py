@@ -1,6 +1,13 @@
 """Configuration file for reusable methods"""
-import pytest
 from tools.api import app, db  # Import the Flask app and in-memory database
+from datetime import datetime, timedelta
+import pytest
+import jwt
+
+# Sample secret and algorithm for testing
+SECRET_KEY = "dimko-qa-demchenko"
+ALGORITHM = "HS256"
+
 
 @pytest.fixture
 def test_client():
@@ -8,10 +15,12 @@ def test_client():
     with app.test_client() as client:
         yield client  # Provide the test client for tests
 
+
 @pytest.fixture(autouse=True)
 def reset_db():
     """Automatically reset the database before each test"""
     db.clear()
+
 
 @pytest.fixture
 def sample_data():
@@ -21,6 +30,7 @@ def sample_data():
         'Entrypoint': '',
         'Image': "ubuntu"
     }
+
 
 @pytest.fixture
 def fetch_containers(test_client):
@@ -39,3 +49,14 @@ def fetch_containers(test_client):
         return response.json
 
     return _fetch_containers
+
+
+@pytest.fixture
+def generate_test_token():
+    """
+    Generate a test JWT token with customizable payload.
+    """
+    def _generate(payload, exp_minutes=15):
+        payload["exp"] = datetime.utcnow() + timedelta(minutes=exp_minutes)
+        return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return _generate
