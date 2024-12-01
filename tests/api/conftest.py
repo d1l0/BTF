@@ -1,6 +1,5 @@
 """Configuration file for reusable methods"""
 import pytest
-import functools
 from tools.api import app, db  # Import the Flask app and in-memory database
 
 @pytest.fixture
@@ -34,10 +33,9 @@ def fetch_containers(client):
     Returns:
         A callable that fetches and returns all containers.
     """
-    def _fetch():
+    def _fetch_containers():
         response = client.get('/orchestrator/containers')
         assert response.status_code == 200, "Failed to fetch containers"
         return response.json
 
-    return _fetch
-
+    return _fetch_containers
