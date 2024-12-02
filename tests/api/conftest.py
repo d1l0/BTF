@@ -1,8 +1,9 @@
 """Configuration file for reusable methods"""
-from tools.api import app, db  # Import the Flask app and in-memory database
 from datetime import datetime, timedelta
 import pytest
 import jwt
+from tools.api import app, db  # Import the Flask app and in-memory database
+
 
 # Sample secret and algorithm for testing
 SECRET_KEY = "dimko-qa-demchenko"

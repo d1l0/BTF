@@ -199,4 +199,4 @@ def method_not_allowed(_):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    pass
