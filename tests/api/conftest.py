@@ -39,7 +39,7 @@ def fetch_containers(test_client):
     Fixture to fetch all containers using the GET /orchestrator/containers endpoint.
 
     Args:
-        client: The test client provided by pytest fixtures.
+        test_client: The test client provided by pytest fixtures.
 
     Returns:
         A callable that fetches and returns all containers.
